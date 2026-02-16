@@ -100,10 +100,12 @@ def main():
     if os.path.exists(".env"):
         print("\nA configuration file (.env) already exists.")
         confirm = input("Do you want to overwrite it? (y/n): ").strip().lower()
+
     if confirm != "y":
         print("\nSetup cancelled. Existing configuration preserved.\n")
-        input("Enter any key to exit setup.")
+        input("Press Enter to exit setup.")
         return
+        
     with open(".env", "w", encoding="utf-8") as f:
         f.write(f"SMTP_SERVER={smtp_server}\n")
         f.write(f"SMTP_PORT={smtp_port}\n")
@@ -121,3 +123,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+
