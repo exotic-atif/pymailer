@@ -24,7 +24,7 @@ Developed by **Atif's Codeworks**
 Open **PowerShell** in the folder where you want PYMailer installed and run:
 
 ```powershell
-curl -L -o install.py https://raw.githubusercontent.com/exotic-atif/pymailer/main/install.py; python install.py; del install.py
+iwr https://raw.githubusercontent.com/exotic-atif/pymailer/main/install.py -OutFile install.py; python install.py; Remove-Item install.py
 ```
 
 This will:
@@ -149,7 +149,7 @@ pymailer.pyw
 To check for updates, run the install command again:
 
 ```powershell
-curl -L -o install.py https://raw.githubusercontent.com/exotic-atif/pymailer/main/install.py; python install.py; del install.py
+iwr https://raw.githubusercontent.com/exotic-atif/pymailer/main/install.py -OutFile install.py; python install.py; Remove-Item install.py
 ```
 
 The installer will:
