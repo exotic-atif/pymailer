@@ -1,4 +1,4 @@
-# PyMailer V1.1.0
+# PyMailer V1.1.1
 # Developed By Atif © 2026 Atif's Codeworks.
 
 import sys
@@ -335,5 +335,6 @@ if __name__ == "__main__":
     window = PYMailer()
     window.show()
     sys.exit(app.exec())
+
 
 
