@@ -1,3 +1,6 @@
+# PYMailer Setup Wizard
+# © 2026 Atif's Codeworks
+
 import os
 import getpass
 
@@ -36,15 +39,16 @@ def get_valid_port(prompt):
         print("Port must be a number.\n")
 
 
-def main():                                                                                    
-                                                                                    
+def escape_env(value):
+    return value.replace('"', '\\"')
+
+
+def main():
+
     print(r"█████▄ ██  ██ ██▄  ▄██  ▄▄▄  ▄▄ ▄▄    ▄▄▄▄▄ ▄▄▄▄    ▄█████ ▄▄▄▄▄ ▄▄▄▄▄▄ ▄▄ ▄▄ ▄▄▄▄  ")
     print(r"██▄▄█▀  ▀██▀  ██ ▀▀ ██ ██▀██ ██ ██    ██▄▄  ██▄█▄   ▀▀▀▄▄▄ ██▄▄    ██   ██ ██ ██▄█▀ ")
     print(r"██       ██   ██    ██ ██▀██ ██ ██▄▄▄ ██▄▄▄ ██ ██   █████▀ ██▄▄▄   ██   ▀███▀ ██    ")
-    print(r"                                                                                    ")
-    
-    if os.path.exists(".env"):
-        print("\n[!] A configuration file (.env) already exists.\n")
+    print()
 
     print("Select Email Provider:\n")
     print("1) Gmail")
@@ -82,7 +86,7 @@ def main():
     print("\n========== Account Configuration ==========\n")
 
     email_address = get_non_empty("Enter Email Address: ")
-    email_password = getpass.getpass("Enter Email App Password (Wont be visible here for safety): ").strip()
+    email_password = getpass.getpass("Enter Email App Password (Won't be visible): ").strip()
 
     if not email_password:
         print("Password cannot be empty.")
@@ -94,18 +98,17 @@ def main():
     signature_name = get_non_empty("Enter Signature Name (Displayed in email): ")
     greet = get_non_empty("Enter Greeting (e.g. Best regards): ")
 
-    def escape_env(value):
-        return value.replace('"', '\\"')
-    
+    # Overwrite check
     if os.path.exists(".env"):
         print("\nA configuration file (.env) already exists.")
         confirm = input("Do you want to overwrite it? (y/n): ").strip().lower()
 
-    if confirm != "y":
-        print("\nSetup cancelled. Existing configuration preserved.\n")
-        input("Press Enter to exit setup.")
-        return
-        
+        if confirm != "y":
+            print("\nSetup cancelled. Existing configuration preserved.\n")
+            input("Press Enter to exit setup.")
+            return
+
+    # Write .env file
     with open(".env", "w", encoding="utf-8") as f:
         f.write(f"SMTP_SERVER={smtp_server}\n")
         f.write(f"SMTP_PORT={smtp_port}\n")
@@ -118,9 +121,9 @@ def main():
     print("\nConfiguration saved successfully.")
     print("'.env' file has been created.\n")
     print("You can now run PYMailer.\n")
-    input("Enter any key to exit setup.")
+
+    input("Press Enter to exit setup.")
 
 
 if __name__ == "__main__":
     main()
-
