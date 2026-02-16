@@ -1,13 +1,13 @@
-#PyMailer V1.0.0
-#Developed By Atif © 2026 Atif's Codeworks.
+# PyMailer V1.0.0
+# Developed By Atif © 2026 Atif's Codeworks.
 
 import sys
 import os
 import ssl
 import smtplib
 import mimetypes
-from email.message import EmailMessage
 import ctypes
+from email.message import EmailMessage
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -18,17 +18,28 @@ from PyQt6.QtWidgets import (
     QFileDialog, QMessageBox, QFrame,
     QSystemTrayIcon, QMenu
 )
-from PyQt6.QtCore import Qt, QThread, pyqtSignal, QPropertyAnimation
+from PyQt6.QtCore import Qt, QThread, pyqtSignal
 from PyQt6.QtGui import QIcon, QFont, QAction
 
 
+# =========================
+# Load Environment Variables Safely
+# =========================
+
 SMTP_SERVER = os.getenv("SMTP_SERVER")
-SMTP_PORT = int(os.getenv("SMTP_PORT"))
+SMTP_PORT = os.getenv("SMTP_PORT")
 EMAIL_ADDRESS = os.getenv("EMAIL_ADDRESS")
 EMAIL_PASSWORD = os.getenv("EMAIL_PASSWORD")
 SENDER_NAME = os.getenv("SENDER_NAME", "Regular Human")
 SIGNATURE_NAME = os.getenv("SIGNATURE_NAME", SENDER_NAME)
 GREET = os.getenv("GREET", "Best regards")
+
+if not all([SMTP_SERVER, SMTP_PORT, EMAIL_ADDRESS, EMAIL_PASSWORD]):
+    raise RuntimeError(
+        "Missing SMTP configuration. Please run setup.py before starting PYMailer."
+    )
+
+SMTP_PORT = int(SMTP_PORT)
 
 
 # =========================
@@ -45,6 +56,8 @@ class EmailThread(QThread):
 
     def run(self):
         try:
+            import html
+
             self.status.emit("Preparing email...")
 
             msg = EmailMessage()
@@ -57,6 +70,11 @@ class EmailThread(QThread):
             if self.data["bcc"]:
                 msg["Bcc"] = self.data["bcc"]
 
+            # Preserve line breaks and escape HTML
+            body_text = self.data["body"]
+            safe_body = html.escape(body_text)
+            body_html = safe_body.replace("\n", "<br>")
+
             html_body = f"""
 <div style="width: 90%; max-width: 600px; margin: 30px auto; background: #fafafa; border-radius: 20px; border: 1px solid #ddd; font-family: Verdana, sans-serif; color: #333; overflow: hidden;">
     
@@ -68,7 +86,7 @@ class EmailThread(QThread):
 
     <div style="padding: 30px;">
         <p style="font-size: 15px; line-height: 1.6;">
-            {self.data["body"]}
+            {body_html}
         </p>
 
         <p style="margin-top: 40px;">{GREET},</p>
@@ -87,13 +105,14 @@ class EmailThread(QThread):
 </div>
 """
 
-
-            msg.set_content(self.data["body"])
+            msg.set_content(body_text)
             msg.add_alternative(html_body, subtype="html")
 
+            # Attachment
             if self.data["attachment"]:
                 self.status.emit("Attaching file...")
                 mime_type, _ = mimetypes.guess_type(self.data["attachment"])
+
                 if mime_type:
                     maintype, subtype = mime_type.split("/")
                 else:
@@ -107,7 +126,7 @@ class EmailThread(QThread):
                         filename=os.path.basename(self.data["attachment"])
                     )
 
-            self.status.emit("Connecting to Gmail...")
+            self.status.emit("Connecting to server...")
             context = ssl.create_default_context()
 
             with smtplib.SMTP(SMTP_SERVER, SMTP_PORT) as server:
@@ -213,9 +232,7 @@ class PYMailer(QWidget):
         self.thread.start()
 
     def fade_ui(self, sending):
-        opacity = 0.6 if sending else 1.0
         self.container.setEnabled(not sending)
-        self.container.setWindowOpacity(opacity)
 
     def handle_success(self):
         self.fade_ui(False)
@@ -274,16 +291,12 @@ class PYMailer(QWidget):
 
     def init_tray(self):
         icon = QIcon(os.path.abspath("mail.ico"))
-
-        # Set window icon explicitly
         self.setWindowIcon(icon)
 
-        # Create tray icon properly
         self.tray = QSystemTrayIcon(self)
         self.tray.setIcon(icon)
         self.tray.setToolTip("Atif's Codeworks - PYMailer")
 
-        # Create tray menu
         menu = QMenu()
 
         open_action = QAction("Open", self)
@@ -297,12 +310,12 @@ class PYMailer(QWidget):
         menu.addAction(quit_action)
 
         self.tray.setContextMenu(menu)
-
-        # Important: show AFTER setting everything
         self.tray.show()
 
 
-
+# =========================
+# App Entry
+# =========================
 if __name__ == "__main__":
     myappid = "atifs.codeworks.pymailer.1.0"
     ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID(myappid)
