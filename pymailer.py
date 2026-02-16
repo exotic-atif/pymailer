@@ -1,4 +1,4 @@
-# PyMailer V1.1.1
+# PyMailer V1.1.2
 # Developed By Atif © 2026 Atif's Codeworks.
 
 import sys
@@ -128,13 +128,18 @@ class EmailThread(QThread):
 
             self.status.emit("Connecting to server...")
             context = ssl.create_default_context()
-
-            with smtplib.SMTP(SMTP_SERVER, SMTP_PORT) as server:
+            if SMTP_PORT == 465:
+                server = smtplib.SMTP_SSL(SMTP_SERVER, SMTP_PORT, context=context)
+            else:
+                server = smtplib.SMTP(SMTP_SERVER, SMTP_PORT)
                 server.starttls(context=context)
-                server.login(EMAIL_ADDRESS, EMAIL_PASSWORD)
 
-                self.status.emit("Uploading to server...")
-                server.send_message(msg)
+            server.login(EMAIL_ADDRESS, EMAIL_PASSWORD)
+
+            self.status.emit("Uploading to server...")
+            server.send_message(msg)
+
+            server.quit()
 
             self.status.emit("Email sent successfully.")
             self.success.emit()
@@ -335,6 +340,7 @@ if __name__ == "__main__":
     window = PYMailer()
     window.show()
     sys.exit(app.exec())
+
 
 
 
