@@ -140,8 +140,19 @@ class EmailThread(QThread):
             self.success.emit()
 
         except Exception as e:
-            self.error.emit(str(e))
+            error_text = str(e)
 
+            # Outlook / Microsoft basic auth disabled detection
+            if "5.7.139" in error_text or "basic authentication is disabled" in error_text.lower():
+                self.error.emit(
+                    "Microsoft has disabled basic SMTP authentication for this account.\n\n"
+                    "Outlook/Hotmail no longer supports basic username/password login.\n\n"
+                    "Please use:\n"
+                    "• Gmail with App Password\n"
+                    "• Or a custom SMTP provider\n"
+                )
+            else:
+                self.error.emit(error_text)
 
 # =========================
 # Main Window
@@ -324,4 +335,5 @@ if __name__ == "__main__":
     window = PYMailer()
     window.show()
     sys.exit(app.exec())
+
 
