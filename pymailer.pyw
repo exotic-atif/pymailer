@@ -1,4 +1,4 @@
-# PyMailer V1.1.2
+# PyMailer V1.1.3
 # Developed By Atif © 2026 Atif's Codeworks.
 
 import sys
@@ -334,14 +334,18 @@ class PYMailer(QWidget):
 # App Entry
 # =========================
 if __name__ == "__main__":
-    myappid = "atifs.codeworks.pymailer.1.0"
-    ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID(myappid)
-
     app = QApplication(sys.argv)
+
+    # Cross-platform Qt identity
+    app.setApplicationName("PYMailer")
+    app.setOrganizationName("Atif's Codeworks")
+    app.setApplicationDisplayName("PYMailer")
+
+    # Windows-only AppUserModelID
+    if sys.platform.startswith("win"):
+        myappid = "atifs.codeworks.pymailer.1.1.3"
+        ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID(myappid)
+
     window = PYMailer()
     window.show()
     sys.exit(app.exec())
-
-
-
-
